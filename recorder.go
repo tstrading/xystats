@@ -128,7 +128,7 @@ func (r *Recorder) Save(
 		fields["xVolume30D"] = xVolume30D
 		fields["yVolume30D"] = yVolume30D
 		pt, err := client.NewPoint(
-			r.config.Measurement,
+			r.config.Name,
 			map[string]string{
 				"xSymbol": xSymbol,
 				"ySymbol": ySymbol,
@@ -194,7 +194,7 @@ func (r *Recorder) Save(
 		fields["netWorth"] = totalBalance / r.config.StartValue
 	}
 	pt, err := client.NewPoint(
-		r.config.Measurement,
+		r.config.Name,
 		map[string]string{
 			"type": "summary",
 		},

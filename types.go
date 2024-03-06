@@ -16,8 +16,9 @@ type InfluxConfig struct {
 }
 
 type RecordConfig struct {
+	Name          string            `yaml:"name"`
+	SaveInterval  time.Duration     `yaml:"saveInterval"`
 	StartValue    float64           `yaml:"startValue"` // 策略起始资金，用来计算净值
-	Measurement   string            `yaml:"measurement"`
 	SymbolMap     map[string]string `yaml:"symbolMap"`
 	InfluxConfigs []InfluxConfig    `yaml:"influxConfigs"`
 }
