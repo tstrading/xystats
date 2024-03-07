@@ -28,10 +28,6 @@ func (r *Recorder) Save(
 		return errors.New("xAccount is nil")
 	}
 
-	if yAccount == nil {
-		return errors.New("yAccount is nil")
-	}
-
 	xTotal24HVolume := 0.0
 	yTotal24HVolume := 0.0
 	xTotal30DVolume := 0.0
@@ -147,10 +143,15 @@ func (r *Recorder) Save(
 	}
 
 	xBalance := xAccount.GetEquity()
-	yBalance := yAccount.GetEquity()
 	xAvailableBalance := xAccount.GetAvailableBalance()
-	yAvailableBalance := yAccount.GetAvailableBalance()
-	totalBalance := xBalance + yBalance
+	yBalance := xBalance
+	yAvailableBalance := xAvailableBalance
+	totalBalance := xBalance
+	if yAccount != nil {
+		yBalance = yAccount.GetEquity()
+		yAvailableBalance = yAccount.GetAvailableBalance()
+		totalBalance = xBalance + yBalance
+	}
 
 	fields := make(map[string]interface{})
 	fields["totalUnhedgedValue"] = totalUnhedgedValue
