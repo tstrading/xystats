@@ -31,6 +31,8 @@ type Position interface {
 type Account interface {
 	GetEquity() float64
 	GetAvailableBalance() float64
+	GetIMR() float64
+	GetMMR() float64
 }
 
 type Recorder struct {

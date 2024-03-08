@@ -146,14 +146,25 @@ func (r *Recorder) Save(
 	xAvailableBalance := xAccount.GetAvailableBalance()
 	yBalance := xBalance
 	yAvailableBalance := xAvailableBalance
+	xIMR := xAccount.GetIMR()
+	xMMR := xAccount.GetMMR()
+	yIMR := xIMR
+	yMMR := xMMR
 	totalBalance := xBalance
 	if yAccount != nil {
 		yBalance = yAccount.GetEquity()
 		yAvailableBalance = yAccount.GetAvailableBalance()
+		yIMR = yAccount.GetIMR()
+		yMMR = yAccount.GetMMR()
 		totalBalance = xBalance + yBalance
 	}
 
 	fields := make(map[string]interface{})
+
+	fields["xIMR"] = xIMR
+	fields["yIMR"] = yIMR
+	fields["xMMR"] = xMMR
+	fields["yMMR"] = yMMR
 	fields["totalUnhedgedValue"] = totalUnhedgedValue
 	fields["totalBalance"] = totalBalance
 	fields["yBalance"] = yBalance
