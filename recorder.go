@@ -13,6 +13,8 @@ func (r *Recorder) Save(
 	timestamp time.Time,
 	xAccount, yAccount Account,
 	xPositionMap, yPositionMap map[string]Position,
+	xFundingRateMap map[string]float64,
+	yFundingRateMap map[string]float64,
 	xMidPriceMap map[string]float64,
 	yMidPriceMap map[string]float64,
 	xVolume24HMap map[string]float64, // 监控短期异常交易量
@@ -113,8 +115,16 @@ func (r *Recorder) Save(
 		fields["xValue"] = xValue
 		fields["yValue"] = yValue
 		fields["yValue"] = yValue
-		fields["xFundingFee"] = xPosition.GetFundingFee()
-		fields["yFundingFee"] = yPosition.GetFundingFee()
+		if xFundingRateMap != nil {
+			if fr, ok := xFundingRateMap[xSymbol]; ok {
+				fields["xFundingRate"] = fr
+			}
+		}
+		if yFundingRateMap != nil {
+			if fr, ok := yFundingRateMap[ySymbol]; ok {
+				fields["yFundingRate"] = fr
+			}
+		}
 		fields["maxOpenValue"] = maxOpenValue
 		fields["xPrice"] = xPrice
 		fields["yPrice"] = yPrice
