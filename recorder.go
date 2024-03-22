@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/tstrading/xystats/influx/client"
-	"github.com/tstrading/xystats/logger"
 	"math"
 	"time"
 )
@@ -134,7 +133,8 @@ func (r *Recorder) Save(
 			timestamp,
 		)
 		if err != nil {
-			logger.Warn("client.NewPoint for %s, %s error %v", xSymbol, ySymbol, err)
+			// logger.Warn("client.NewPoint for %s, %s error %v", xSymbol, ySymbol, err)
+			return err
 		} else {
 			for _, iw := range r.influxWriters {
 				iw.PushPoint(pt)
@@ -211,10 +211,55 @@ func (r *Recorder) Save(
 			"type": "summary",
 		},
 		fields,
-		time.Now().UTC(),
+		timestamp,
 	)
 	if err != nil {
-		logger.Debugf("client.NewPoint error %v", err)
+		// logger.Debugf("client.NewPoint error %v", err)
+		return err
+	} else {
+		for _, iw := range r.influxWriters {
+			iw.PushPoint(pt)
+		}
+	}
+	return nil
+}
+
+func (r *Recorder) SaveXOrder(
+	timestamp time.Time,
+	order Order,
+) error {
+	if pt, err := client.NewPoint(
+		r.config.Name,
+		map[string]string{
+			"type":    "xOrder",
+			"xSymbol": order.Symbol,
+		},
+		order.toInfluxFields(),
+		timestamp,
+	); err != nil {
+		return err
+	} else {
+		for _, iw := range r.influxWriters {
+			iw.PushPoint(pt)
+		}
+	}
+	return nil
+}
+
+func (r *Recorder) SaveYOrder(
+	timestamp time.Time,
+	order Order,
+) error {
+	if pt, err := client.NewPoint(
+		r.config.Name,
+		map[string]string{
+			"type":    "yOrder",
+			"ySymbol": order.Symbol,
+		},
+		order.toInfluxFields(),
+		timestamp,
+	); err != nil {
+		return err
 	} else {
 		for _, iw := range r.influxWriters {
 			iw.PushPoint(pt)

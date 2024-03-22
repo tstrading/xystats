@@ -50,3 +50,52 @@ type InfluxWriter struct {
 	allSaved     int64
 	mu           sync.Mutex
 }
+
+type Order struct {
+	Id           string
+	ClientId     string
+	Symbol       string
+	Price        float64
+	Qty          float64
+	Side         string
+	Status       string
+	CancelType   string
+	RejectReason string
+	AvgPrice     float64
+	CumExecQty   float64
+	CumExecValue float64
+	CumExecFee   float64
+	TimeInForce  string
+	OrderType    string
+	ReduceOnly   bool
+	CreatedTime  int64
+	UpdatedTime  int64
+	Slippage     float64
+}
+
+func (order *Order) toInfluxFields() map[string]interface{} {
+	fields := make(map[string]interface{})
+	fields["orderId"] = order.Id
+	fields["orderClientId"] = order.ClientId
+	fields["orderPrice"] = order.Price
+	fields["orderQty"] = order.Qty
+	fields["orderSide"] = order.Side
+	fields["orderStatus"] = order.Status
+	fields["orderCancelType"] = order.CancelType
+	fields["orderRejectReason"] = order.RejectReason
+	fields["orderAvgPrice"] = order.AvgPrice
+	fields["orderCumExecQty"] = order.CumExecQty
+	fields["orderCumExecValue"] = order.CumExecValue
+	fields["orderCumExecFee"] = order.CumExecFee
+	fields["orderTimeInForce"] = order.TimeInForce
+	fields["orderType"] = order.OrderType
+	if order.ReduceOnly {
+		fields["orderReduceOnly"] = 1
+	} else {
+		fields["orderReduceOnly"] = 0
+	}
+	fields["orderCreatedTime"] = order.CreatedTime
+	fields["orderUpdatedTime"] = order.UpdatedTime
+	fields["orderSlippage"] = order.Slippage
+	return fields
+}
