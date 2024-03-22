@@ -26,6 +26,7 @@ type RecordConfig struct {
 type Position interface {
 	GetSizeInCoin() float64
 	GetEntryPrice() float64
+	GetFundingFee() float64
 }
 
 type Account interface {

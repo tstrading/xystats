@@ -112,6 +112,9 @@ func (r *Recorder) Save(
 		fields["ySize"] = ySize
 		fields["xValue"] = xValue
 		fields["yValue"] = yValue
+		fields["yValue"] = yValue
+		fields["xFundingFee"] = xPosition.GetFundingFee()
+		fields["yFundingFee"] = yPosition.GetFundingFee()
 		fields["maxOpenValue"] = maxOpenValue
 		fields["xPrice"] = xPrice
 		fields["yPrice"] = yPrice
