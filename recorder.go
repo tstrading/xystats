@@ -17,6 +17,7 @@ func (r *Recorder) Save(
 	yFundingRateMap map[string]float64,
 	xMidPriceMap map[string]float64,
 	yMidPriceMap map[string]float64,
+	basisMap map[string]float64,
 	xVolume24HMap map[string]float64, // 监控短期异常交易量
 	yVolume24HMap map[string]float64,
 	xVolume30DMap map[string]float64,
@@ -129,6 +130,13 @@ func (r *Recorder) Save(
 		fields["xPrice"] = xPrice
 		fields["yPrice"] = yPrice
 		fields["xMidPrice"] = xMidPrice
+		fields["yMidPrice"] = yMidPrice
+		if basisMap != nil {
+			if basis, ok := basisMap[xSymbol]; ok {
+				fields["basis"] = basis
+			}
+		}
+		fields["xMidPrice"] = basisMap
 		fields["yMidPrice"] = yMidPrice
 		fields["unhedgedValue"] = unhedgedValue
 		fields["xVolume24H"] = xVolume24H
