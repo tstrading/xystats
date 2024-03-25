@@ -136,8 +136,6 @@ func (r *Recorder) Save(
 				fields["basis"] = basis
 			}
 		}
-		fields["xMidPrice"] = basisMap
-		fields["yMidPrice"] = yMidPrice
 		fields["unhedgedValue"] = unhedgedValue
 		fields["xVolume24H"] = xVolume24H
 		fields["yVolume24H"] = yVolume24H
