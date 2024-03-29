@@ -265,6 +265,27 @@ func (r *Recorder) SaveXOrder(
 	return nil
 }
 
+func (r *Recorder) SaveTimestamps(
+	timestamp time.Time,
+	timestamps TimeStamps,
+) error {
+	if pt, err := client.NewPoint(
+		r.config.Name,
+		map[string]string{
+			"type": "timestamps",
+		},
+		timestamps.toInfluxFields(),
+		timestamp,
+	); err != nil {
+		return err
+	} else {
+		for _, iw := range r.influxWriters {
+			iw.PushPoint(pt)
+		}
+	}
+	return nil
+}
+
 func (r *Recorder) SaveYOrder(
 	timestamp time.Time,
 	order Order,

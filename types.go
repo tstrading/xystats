@@ -73,6 +73,28 @@ type Order struct {
 	Slippage     float64
 }
 
+type TimeStamps struct {
+	MarketTs      int64
+	MarketFetchTs int64
+	MarketPubTs   int64
+	StartTs       int64
+	EndTs         int64
+	FinishTs      int64
+	Cid           string
+}
+
+func (tss *TimeStamps) toInfluxFields() map[string]interface{} {
+	fields := make(map[string]interface{})
+	fields["marketTs"] = tss.MarketTs
+	fields["marketFetchTs"] = tss.MarketFetchTs
+	fields["marketPubTs"] = tss.MarketPubTs
+	fields["startTs"] = tss.StartTs
+	fields["endTs"] = tss.EndTs
+	fields["finishTs"] = tss.FinishTs
+	fields["cid"] = tss.Cid
+	return fields
+}
+
 func (order *Order) toInfluxFields() map[string]interface{} {
 	fields := make(map[string]interface{})
 	fields["orderId"] = order.Id
