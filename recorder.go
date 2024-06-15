@@ -79,6 +79,12 @@ func (r *Recorder) Save(
 		if !ok9 {
 			return fmt.Errorf("maxOpenValue for %s is missing", xSymbol)
 		}
+		if xMidPrice < 0 {
+			xMidPrice = 0
+		}
+		if yMidPrice < 0 {
+			yMidPrice = 0
+		}
 
 		xSize := xPosition.GetSizeInCoin()
 		ySize := yPosition.GetSizeInCoin()

@@ -44,11 +44,13 @@ type InfluxWriter struct {
 	config       InfluxConfig
 	influxClient client.Client
 	done         chan interface{}
-	points       []*client.Point
+	pushedPoints []*client.Point
+	savingPoints []*client.Point
 	stopped      int64
 	allSavedCh   chan interface{}
 	allSaved     int64
-	mu           sync.Mutex
+	pushMu       sync.Mutex
+	saveMu       sync.Mutex
 }
 
 type Order struct {

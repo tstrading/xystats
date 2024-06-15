@@ -20,18 +20,26 @@ func (iw *InfluxWriter) Stop() {
 }
 
 func (iw *InfluxWriter) PushPoint(pt *client.Point) {
-	defer iw.mu.Unlock()
-	iw.mu.Lock()
-	iw.points = append(iw.points, pt)
+	defer iw.pushMu.Unlock()
+	iw.pushMu.Lock()
+	iw.pushedPoints = append(iw.pushedPoints, pt)
 }
 
 func (iw *InfluxWriter) PushPoints(pts []*client.Point) {
-	defer iw.mu.Unlock()
-	iw.mu.Lock()
-	iw.points = append(iw.points, pts...)
+	defer iw.pushMu.Unlock()
+	iw.pushMu.Lock()
+	iw.pushedPoints = append(iw.pushedPoints, pts...)
 }
 
 func (iw *InfluxWriter) save(saveAll bool) {
+	iw.saveMu.Lock()
+	iw.pushMu.Lock()
+	if len(iw.pushedPoints) > 0 {
+		iw.savingPoints = append(iw.savingPoints, iw.pushedPoints...)
+		iw.pushedPoints = iw.pushedPoints[:0]
+	}
+	iw.pushMu.Unlock()
+	iw.saveMu.Unlock()
 	if saveAll {
 		defer func() {
 			if atomic.CompareAndSwapInt64(&iw.allSaved, 0, 1) {
@@ -47,18 +55,19 @@ func (iw *InfluxWriter) save(saveAll bool) {
 			return
 		}
 		saveEnd := -1
-		iw.mu.Lock()
-		if len(iw.points) > 0 {
-			if len(iw.points) > iw.config.BatchSize {
+		iw.saveMu.Lock()
+		if len(iw.savingPoints) > 0 {
+			if len(iw.savingPoints) > iw.config.BatchSize {
 				saveEnd = iw.config.BatchSize
 			} else {
-				saveEnd = len(iw.points)
+				saveEnd = len(iw.savingPoints)
 			}
 		}
-		iw.mu.Unlock()
 		if saveEnd == -1 {
+			iw.saveMu.Unlock()
 			return
 		}
+		savingPoints := iw.savingPoints[:saveEnd]
 		bp, err := client.NewBatchPoints(client.BatchPointsConfig{
 			Database:  iw.config.Database,
 			Precision: "ns",
@@ -66,25 +75,23 @@ func (iw *InfluxWriter) save(saveAll bool) {
 		if err != nil {
 			logger.Warnf("%p client.NewBatchPoints error %v", iw, err)
 			retryCount++
+			iw.saveMu.Unlock()
 			time.Sleep(time.Second * 3)
 			continue
 		}
 
-		iw.mu.Lock()
-		bp.AddPoints(iw.points[:saveEnd])
-		iw.mu.Unlock()
-
+		bp.AddPoints(savingPoints)
 		err = iw.influxClient.Write(bp)
 		if err != nil {
 			logger.Warnf("%p iw.influxClient.Write error %v", iw, err)
 			retryCount++
+			iw.saveMu.Unlock()
 			time.Sleep(time.Second * 3)
 			continue
 		}
 
-		iw.mu.Lock()
-		iw.points = iw.points[saveEnd:]
-		iw.mu.Unlock()
+		iw.savingPoints = iw.savingPoints[saveEnd:]
+		iw.saveMu.Unlock()
 
 		if !saveAll {
 			return
@@ -135,7 +142,8 @@ func NewInfluxWriter(ctx context.Context, config InfluxConfig) (*InfluxWriter, e
 		config:       config,
 		influxClient: influxClient,
 		done:         make(chan interface{}, 1),
-		points:       make([]*client.Point, 0),
+		pushedPoints: make([]*client.Point, 0),
+		savingPoints: make([]*client.Point, 0),
 		stopped:      0,
 		allSaved:     0,
 		allSavedCh:   make(chan interface{}),
